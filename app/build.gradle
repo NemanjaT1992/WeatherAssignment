@@ -24,4 +24,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:recyclerview-v7:+'
+//    compile 'http://api.openweathermap.org/data/2.5/forecast/city?id=524901&APPID={376a8e8db3dbb5bb7a4d765abee08f6c}'
 }
