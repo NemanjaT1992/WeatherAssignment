@@ -57,9 +57,12 @@ public class JSONParser
                 String country = getString("country", sys);
                 String cityOwmIdString = getString("id", listData.getJSONObject(i));
 
-                int tempInCelsius = (int) (Double.parseDouble(temp) - 273.15);
+                int tempInCelsius = (int) Double.parseDouble(temp);
+
+                long id = CitiesData.getInstance().getCityID(cityOwmIdString);
 
                 tmpResult = new City(name, String.valueOf(tempInCelsius) + (char) 0x00B0 + "C", humidity, desctiption, country, cityOwmIdString);
+                tmpResult.setID(id);
                 resultList.add(tmpResult);
             }
         }
