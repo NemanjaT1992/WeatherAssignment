@@ -60,6 +60,7 @@ public class CitiesData
     }
     public void updateCity(City city)
     {
+        cities.set(getCityIndex(city), city);
         dbAdapter.open();
         dbAdapter.updateCity(city.getID(), city);
         dbAdapter.close();
@@ -70,5 +71,23 @@ public class CitiesData
         dbAdapter.open();
         dbAdapter.insertCity(city);
         dbAdapter.close();
+    }
+    public long getCityID(String cowmid)
+    {
+        for(int i=0; i<cities.size(); ++i)
+        {
+            if(cities.get(i).getCityOwmID().equals(cowmid))
+                return cities.get(i).getID();
+        }
+        return -1;
+    }
+    public int getCityIndex(City city)
+    {
+        for(int i=0; i<cities.size(); ++i)
+        {
+            if(cities.get(i).getCityOwmID().equals(city.getCityOwmID()))
+                return i;
+        }
+        return -1;
     }
 }
