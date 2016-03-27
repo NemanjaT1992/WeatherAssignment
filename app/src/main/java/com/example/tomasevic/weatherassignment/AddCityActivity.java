@@ -23,6 +23,7 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
     ListView cityResultView;
     ArrayList<String> result;
     ArrayAdapter<String> resultAdapter;
+    ArrayList<City> searchResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,6 +45,7 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
         resultAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, result);
 
         cityResultView.setAdapter(resultAdapter);
+        searchResult = new ArrayList<>();
     }
 
     public void searchForCity()
@@ -52,11 +54,11 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
 
         try
         {
-            City city = (City)task.execute(new String[]{citySearchName.getText().toString()}).get();
+            searchResult = (ArrayList<City>)task.execute(new String[]{citySearchName.getText().toString()}).get();
             result.clear();
-            if(city != null)
+            if(searchResult != null)
             {
-                result.add(city.getName() + ", " + city.getCountry());
+                result.add(searchResult.get(0).getName() + ", " + searchResult.get(0).getCountry());
                 resultAdapter.notifyDataSetChanged();
             }
 
@@ -78,7 +80,14 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
                 if(citySearchName.getText().length() != 0 && !citySearchName.getText().toString().contains(" "))
                     searchForCity();
                 else
-                    Toast.makeText(AddCityActivity.this, getText(R.string.enter_city_name), Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddCityActivity.this, getText(R.string.enter_city_name), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.addCityButton:
+                if(searchResult != null)
+                {
+                    CitiesData.getInstance().addNewCity(searchResult.get(0));
+                    Toast.makeText(AddCityActivity.this, getText(R.string.city_added), Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
