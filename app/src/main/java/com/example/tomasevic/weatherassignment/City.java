@@ -5,19 +5,22 @@ package com.example.tomasevic.weatherassignment;
  */
 public class City
 {
+    long ID;
     String name;
     String temp;
     String humidity;
     String description;
     String country;
+    String city_owm_id;
 
-    public City(String n, String t, String h, String d, String c)
+    public City(String n, String t, String h, String d, String c, String cowmid)
     {
         name = n;
         temp = t;
         humidity = h;
         description = d;
         country = c;
+        city_owm_id = cowmid;
     }
     public City()
     {
@@ -26,6 +29,8 @@ public class City
         humidity = "";
         description = "";
         country = "";
+        ID = -1;
+        city_owm_id = "";
     }
 
     public String getName()
@@ -48,6 +53,8 @@ public class City
     {
         return country;
     }
+    public long getID(){return  ID;}
+    public String getCityOwmID(){return city_owm_id;}
 
     public void setName(String n)
     {
@@ -69,4 +76,6 @@ public class City
     {
         country = c;
     }
+    public void setID(long id){ID = id;}
+    public void setCityOwmID(String id){city_owm_id = id;}
 }

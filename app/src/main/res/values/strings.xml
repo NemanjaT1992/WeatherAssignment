@@ -6,4 +6,10 @@
     <string name="add_city">Add</string>
     <string name="searchButton">Search</string>
     <string name="enter_city_name">Invalid city name</string>
+    <string name="city_added">City successfully added</string>
+    <string name="temperature">Temperature:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="description">Description:</string>
+    <string name="undo_delete">City deleted</string>
+    <string name="undo">Undo</string>
 </resources>
