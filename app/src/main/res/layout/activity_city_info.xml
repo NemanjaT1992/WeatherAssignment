@@ -28,25 +28,26 @@
         android:layout_height="match_parent"
         android:layout_weight="50"
         android:orientation="vertical"
-        android:layout_marginRight="3dp">
+        android:layout_marginRight="3dp"
+        android:paddingLeft="10dp">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:textSize="18dp"
                 android:text="@string/temperature"
-                android:gravity="right"/>
+                android:gravity="left"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:textSize="18dp"
                 android:text="@string/humidity"
-                android:gravity="right"/>
+                android:gravity="left"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:textSize="18dp"
                 android:text="@string/description"
-                android:gravity="right"/>
+                android:gravity="left"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"

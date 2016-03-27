@@ -1,5 +1,6 @@
 package com.example.tomasevic.weatherassignment;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,6 +40,15 @@ public class CitiesListAdapter extends RecyclerView.Adapter<CitiesListAdapter.Ci
         holder.cityName.setText(citiesList.get(position).getName());
         holder.cityTemp.setText(citiesList.get(position).getTemp());
         holder.id = citiesList.get(position).getID();
+
+        String teperatureString = citiesList.get(position).getTemp();
+        int temperature = Integer.parseInt(teperatureString.substring(0, teperatureString.length()-2));
+        if(temperature < 15)
+            holder.cityTemp.setBackgroundColor(Color.parseColor("#0094ff"));
+        else if(temperature >=15 && temperature < 24)
+            holder.cityTemp.setBackgroundColor(Color.parseColor("#00ff5c"));
+        else
+            holder.cityTemp.setBackgroundColor(Color.parseColor("#FFA500"));
     }
 
     @Override

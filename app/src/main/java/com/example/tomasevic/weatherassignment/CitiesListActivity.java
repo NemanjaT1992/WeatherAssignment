@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nispok.snackbar.SnackbarManager;
@@ -30,6 +31,7 @@ public class CitiesListActivity extends AppCompatActivity
     private RecyclerView.Adapter citiesListAdapter;
     private RecyclerView.LayoutManager rvlayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView emptyListTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +53,20 @@ public class CitiesListActivity extends AppCompatActivity
             @Override
             public void onRefresh()
             {
-                swipeRefreshLayout.setEnabled(false);
-                refreshCities();
-                swipeRefreshLayout.setEnabled(true);
+                if(checkConnectivity() != null)
+                {
+                    swipeRefreshLayout.setEnabled(false);
+                    refreshCities();
+                    swipeRefreshLayout.setEnabled(true);
+                }
+                else
+                {
+                    swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(CitiesListActivity.this, getText(R.string.internet), Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
-//        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
-//        recyclerView.addItemDecoration(itemDecoration);
+        emptyListTV = (TextView) findViewById(R.id.emptyList);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -70,11 +78,6 @@ public class CitiesListActivity extends AppCompatActivity
             }
         });
 
-        if(CitiesData.getInstance().getCities().size() == 0)
-        {
-            Snackbar.make(recyclerView, getResources().getText(R.string.empty_cities_list), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-        }
-
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)
         {
 
@@ -85,27 +88,48 @@ public class CitiesListActivity extends AppCompatActivity
             }
 
             @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir)
+            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir)
             {
-                final City deletedCity = CitiesData.getInstance().getCity(viewHolder.getPosition());
+                final boolean[] undo = {false};
                 final int position = viewHolder.getPosition();
+                final City deletedCity = CitiesData.getInstance().getCity(position);
 
-                CitiesData.getInstance().deleteCity(viewHolder.getPosition());
+                CitiesData.getInstance().removeCityFromList(position);
                 citiesListAdapter.notifyDataSetChanged();
 
-                SnackbarManager.show(com.nispok.snackbar.Snackbar.with(CitiesListActivity.this)
-                        .text(getText(R.string.undo_delete))
-                        .actionLabel(getText(R.string.undo))
-                        .actionListener(new ActionClickListener()
-                        {
-                            @Override
-                            public void onActionClicked(com.nispok.snackbar.Snackbar snackbar)
-                            {
-//                                Toast.makeText(CitiesListActivity.this, getText(R.string.undo_delete), Toast.LENGTH_SHORT).show();
-                                CitiesData.getInstance().undoCity(position, deletedCity);
-                                citiesListAdapter.notifyDataSetChanged();
-                            }
-                        }));
+
+                Snackbar snackbar = Snackbar.make(recyclerView, getText(R.string.undo_delete).toString(), Snackbar.LENGTH_LONG);
+                snackbar.setAction(getText(R.string.undo), new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        CitiesData.getInstance().undoCity(position, deletedCity);
+                        citiesListAdapter.notifyDataSetChanged();
+                        undo[0] = true;
+                    }
+                });
+                snackbar.setCallback(new Snackbar.Callback()
+                {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event)
+                    {
+                        super.onDismissed(snackbar, event);
+                        if(!undo[0])
+                            CitiesData.getInstance().deleteCity(deletedCity);
+
+                        if(CitiesData.getInstance().getCities().size() == 0)
+                            emptyListTV.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onShown(Snackbar snackbar)
+                    {
+                        super.onShown(snackbar);
+                    }
+                });
+                snackbar.setActionTextColor(getResources().getColor(R.color.red));
+                snackbar.show();
             }
         };
 
@@ -119,6 +143,12 @@ public class CitiesListActivity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
+
+        if(CitiesData.getInstance().getCities().size() == 0)
+            emptyListTV.setVisibility(View.VISIBLE);
+        else
+            emptyListTV.setVisibility(View.GONE);
+
         citiesListAdapter.notifyDataSetChanged();
 
         ((CitiesListAdapter)citiesListAdapter).setOnItemClickListener(new CitiesListAdapter.ListOnClickListener()
@@ -133,27 +163,6 @@ public class CitiesListActivity extends AppCompatActivity
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
     public void refreshCities()
     {
         String idsList = "";
@@ -162,18 +171,18 @@ public class CitiesListActivity extends AppCompatActivity
         updatedList = new ArrayList<>();
         WeatherAsyncTask task = new WeatherAsyncTask();
 
-        for(int j=0; j<listToUpdate.size()-1; ++j)
+        if (listToUpdate.size() == 1)
+            idsList = listToUpdate.get(0).getCityOwmID().toString() + "-";
+
+        for (int j = 0; j < listToUpdate.size() - 1; ++j)
             idsList += listToUpdate.get(j).getCityOwmID() + "-";
-        idsList += listToUpdate.get(listToUpdate.size()-1).getCityOwmID();
+        idsList += listToUpdate.get(listToUpdate.size() - 1).getCityOwmID();
 
         try
         {
             updatedList = (ArrayList<City>) task.execute(new String[]{idsList}).get();
-//                tmpArray.add((City)tasksArray.get(i).execute(new String[]{refreshList.get(i).getName()}).get());
-//                CitiesData.getInstance().updateCity(tmpArray.get(i));
-//                CitiesData.getInstance().updateCity(currentRefreshCity);
 
-            for(int j=0; j<updatedList.size(); ++j)
+            for (int j = 0; j < updatedList.size(); ++j)
                 CitiesData.getInstance().updateCity(updatedList.get(j));
 
         } catch (InterruptedException e)
@@ -186,6 +195,22 @@ public class CitiesListActivity extends AppCompatActivity
 
         citiesListAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
+    }
+    public Object checkConnectivity()
+    {
+        ConnectionDetector connectionDetector = new ConnectionDetector(this);
+        Object available = null;
+        try
+        {
+            available = connectionDetector.execute(new String[]{"available"}).get();
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        } catch (ExecutionException e)
+        {
+            e.printStackTrace();
+        }
+        return available;
     }
 }
 
