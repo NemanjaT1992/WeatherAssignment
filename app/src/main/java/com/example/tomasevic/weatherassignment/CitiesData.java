@@ -51,12 +51,16 @@ public class CitiesData
     {
         return cities.get(index);
     }
-    public void deleteCity(int index)
+    public void deleteCity(City city)
     {
-        City city = cities.remove(index);
+//        City city = cities.get(index);
         dbAdapter.open();
         boolean success = dbAdapter.removeCity(city.getID());
         dbAdapter.close();
+    }
+    public void removeCityFromList(int index)
+    {
+        cities.remove(index);
     }
     public void updateCity(City city)
     {
@@ -68,9 +72,9 @@ public class CitiesData
     public void undoCity(int position, City city)
     {
         cities.add(position, city);
-        dbAdapter.open();
-        dbAdapter.insertCity(city);
-        dbAdapter.close();
+//        dbAdapter.open();
+//        dbAdapter.insertCity(city);
+//        dbAdapter.close();
     }
     public long getCityID(String cowmid)
     {

@@ -4,10 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="2dp"
+    android:padding="5dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".CitiesListActivity"
     tools:showIn="@layout/activity_main">
+
+    <TextView
+        android:id="@+id/emptyList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="25dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/empty_list"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"

@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -48,13 +51,13 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
         searchResult = new ArrayList<>();
     }
 
-    public void searchForCity()
+    public void searchForCity(String name)
     {
         WeatherAsyncTask task = new WeatherAsyncTask();
 
         try
         {
-            searchResult = (ArrayList<City>)task.execute(new String[]{citySearchName.getText().toString()}).get();
+            searchResult = (ArrayList<City>)task.execute(new String[]{name}).get();
             result.clear();
             if(searchResult != null)
             {
@@ -77,18 +80,54 @@ public class AddCityActivity extends AppCompatActivity implements View.OnClickLi
         switch (v.getId())
         {
             case R.id.searchButton:
-                if(citySearchName.getText().length() != 0 && !citySearchName.getText().toString().contains(" "))
-                    searchForCity();
-                else
+                if (citySearchName.getText().length() != 0)
+                {
+                    if(checkConnectivity() != null)
+                    {
+                        String cityName = citySearchName.getText().toString();
+                        if (cityName.contains(" "))
+                        {
+                            cityName = "";
+                            String[] multiWordCity = citySearchName.getText().toString().split(" ");
+                            for (int i = 0; i < multiWordCity.length; ++i)
+                                cityName += multiWordCity[i];
+                        }
+                        searchForCity(cityName);
+                    }
+                    else
+                        Toast.makeText(AddCityActivity.this, getText(R.string.internet), Toast.LENGTH_SHORT).show();
+
+                } else
                     Toast.makeText(AddCityActivity.this, getText(R.string.enter_city_name), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.addCityButton:
-                if(searchResult != null)
+                if(searchResult.size() != 0)
                 {
                     CitiesData.getInstance().addNewCity(searchResult.get(0));
                     Toast.makeText(AddCityActivity.this, getText(R.string.city_added), Toast.LENGTH_SHORT).show();
+                    result.clear();
+                    resultAdapter.notifyDataSetChanged();
+                    citySearchName.setText("");
                 }
+                else
+                    Toast.makeText(AddCityActivity.this, getText(R.string.empty_search), Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+    public Object checkConnectivity()
+    {
+        ConnectionDetector connectionDetector = new ConnectionDetector(this);
+        Object available = null;
+        try
+        {
+            available = connectionDetector.execute(new String[]{"available"}).get();
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        } catch (ExecutionException e)
+        {
+            e.printStackTrace();
+        }
+        return available;
     }
 }
